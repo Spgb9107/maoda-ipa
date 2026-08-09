@@ -1,28 +1,28 @@
 /* ============================================
-   茂达智联 V1.0 — Interactive JavaScript
+   茂达智联 V2.0 — Interactive JavaScript
    ============================================ */
 
 (function() {
     'use strict';
 
     /* ===== Theme Toggle ===== */
-    const themeToggle = document.getElementById('themeToggle');
-    const html = document.documentElement;
+    var themeToggle = document.getElementById('themeToggle');
+    var html = document.documentElement;
 
     // Load saved theme
-    const savedTheme = localStorage.getItem('maoda-theme') || 'light';
+    var savedTheme = localStorage.getItem('maoda-theme') || 'light';
     html.setAttribute('data-theme', savedTheme);
 
     themeToggle.addEventListener('click', function() {
-        const currentTheme = html.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        var currentTheme = html.getAttribute('data-theme');
+        var newTheme = currentTheme === 'light' ? 'dark' : 'light';
         html.setAttribute('data-theme', newTheme);
         localStorage.setItem('maoda-theme', newTheme);
     });
 
     /* ===== Mobile Menu ===== */
-    const navToggle = document.getElementById('navToggle');
-    const navMenu = document.getElementById('navMenu');
+    var navToggle = document.getElementById('navToggle');
+    var navMenu = document.getElementById('navMenu');
 
     navToggle.addEventListener('click', function() {
         navToggle.classList.toggle('active');
@@ -38,11 +38,11 @@
     });
 
     /* ===== Navbar Scroll Effect ===== */
-    const navbar = document.getElementById('navbar');
-    const backToTop = document.getElementById('backToTop');
+    var navbar = document.getElementById('navbar');
+    var backToTop = document.getElementById('backToTop');
 
     window.addEventListener('scroll', function() {
-        const scrollY = window.scrollY;
+        var scrollY = window.scrollY;
 
         if (scrollY > 50) {
             navbar.classList.add('scrolled');
@@ -63,8 +63,8 @@
     });
 
     /* ===== Active Nav Link on Scroll ===== */
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
+    var sections = document.querySelectorAll('section[id]');
+    var navLinks = document.querySelectorAll('.nav-link');
 
     function updateActiveNav() {
         var scrollY = window.scrollY + 100;
@@ -113,7 +113,12 @@
     }
 
     /* ===== Intersection Observer for Reveal & Counter ===== */
-    var revealElements = document.querySelectorAll('.section-header, .about-intro, .about-culture, .service-card, .process-step, .case-card, .partner-logo, .contact-item, .contact-form-wrapper, .advantage-item, .culture-card, .highlight-item, .intl-section, .qual-item');
+    var revealElements = document.querySelectorAll(
+        '.section-header, .about-intro, .about-culture, .about-qualifications, ' +
+        '.service-block, .service-sub-card, .advantage-item, .culture-card, ' +
+        '.highlight-item, .case-card, .partner-logo, .contact-item, .contact-form-wrapper, ' +
+        '.intl-item, .intl-section, .qual-badge, .news-empty'
+    );
 
     revealElements.forEach(function(el, index) {
         el.classList.add('reveal');
@@ -172,20 +177,6 @@
         });
     }, 500);
 
-    /* ===== Service Card Expand/Collapse ===== */
-    document.querySelectorAll('.service-toggle').forEach(function(button) {
-        button.addEventListener('click', function() {
-            var card = this.closest('.service-card');
-            card.classList.toggle('expanded');
-
-            if (card.classList.contains('expanded')) {
-                this.textContent = '收起详情';
-            } else {
-                this.textContent = '查看详情';
-            }
-        });
-    });
-
     /* ===== Case Tabs ===== */
     var caseTabs = document.querySelectorAll('.case-tab');
     var casePanels = document.querySelectorAll('.case-panel');
@@ -196,6 +187,25 @@
 
             caseTabs.forEach(function(t) { t.classList.remove('active'); });
             casePanels.forEach(function(p) { p.classList.remove('active'); });
+
+            this.classList.add('active');
+            var targetPanel = document.getElementById(targetTab);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+
+    /* ===== News Tabs ===== */
+    var newsTabs = document.querySelectorAll('.news-tab');
+    var newsPanels = document.querySelectorAll('.news-panel');
+
+    newsTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var targetTab = this.getAttribute('data-tab');
+
+            newsTabs.forEach(function(t) { t.classList.remove('active'); });
+            newsPanels.forEach(function(p) { p.classList.remove('active'); });
 
             this.classList.add('active');
             var targetPanel = document.getElementById(targetTab);
@@ -277,8 +287,8 @@
         });
     });
 
-    console.log('%c茂达智联 V1.0', 'font-size: 24px; font-weight: bold; color: #C9A84C;');
+    console.log('%c茂达智联 V2.0', 'font-size: 24px; font-weight: bold; color: #C9A84C;');
     console.log('%c知识产权全生命周期管理专家', 'font-size: 14px; color: #1A3A5C;');
-    console.log('%c© 2016-2026 深圳茂达智联知识产权代理事务所', 'font-size: 12px; color: #888;');
+    console.log('%c© 2016-2026 深圳茂达智联知识产权代理事务所（普通合伙）', 'font-size: 12px; color: #888;');
 
 })();
