@@ -108,7 +108,7 @@
         var revealTargets = document.querySelectorAll(
             '.service-block, .case-field, .result-block, .team-card, ' +
             '.country-item, .qual-fact, .qual-figure, .culture-card, ' +
-            '.stat-item, .partner-logo, .contact-item'
+            '.stat-item, .partner-logo, .contact-item, .news-article-card'
         );
         revealTargets.forEach(function(el) {
             el.classList.add('reveal');
@@ -184,6 +184,36 @@
         });
         btn.addEventListener('mouseleave', function() { this.style.transform = ''; });
     });
+
+    /* ===== Qualification Image Lightbox ===== */
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightboxImg');
+    var lightboxClose = document.getElementById('lightboxClose');
+
+    if (lightbox && lightboxImg) {
+        document.querySelectorAll('.qual-figure[data-zoom]').forEach(function(fig) {
+            fig.addEventListener('click', function() {
+                lightboxImg.src = this.getAttribute('data-zoom');
+                lightboxImg.alt = this.querySelector('img') ? this.querySelector('img').alt : '';
+                lightbox.classList.add('is-open');
+                lightbox.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        function closeLightbox() {
+            lightbox.classList.remove('is-open');
+            lightbox.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) closeLightbox();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightbox.classList.contains('is-open')) closeLightbox();
+        });
+    }
 
     console.log('%c茂达智联 V3.0', 'font-size: 24px; font-weight: bold; color: #C9A84C;');
     console.log('%c知识产权全生命周期管理专家', 'font-size: 14px; color: #1A3A5C;');
