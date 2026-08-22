@@ -1,5 +1,5 @@
 /* ============================================
-   茂达智联 V2.0 — Interactive JavaScript
+   茂达智联 V3.0 — Interactive JavaScript
    ============================================ */
 
 (function() {
@@ -9,246 +9,149 @@
     var themeToggle = document.getElementById('themeToggle');
     var html = document.documentElement;
 
-    // Load saved theme
     var savedTheme = localStorage.getItem('maoda-theme') || 'light';
     html.setAttribute('data-theme', savedTheme);
 
-    themeToggle.addEventListener('click', function() {
-        var currentTheme = html.getAttribute('data-theme');
-        var newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', newTheme);
-        localStorage.setItem('maoda-theme', newTheme);
-    });
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            var current = html.getAttribute('data-theme');
+            var next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('maoda-theme', next);
+        });
+    }
 
     /* ===== Mobile Menu ===== */
     var navToggle = document.getElementById('navToggle');
     var navMenu = document.getElementById('navMenu');
 
-    navToggle.addEventListener('click', function() {
-        navToggle.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
-
-    // Close mobile menu when clicking a link
-    document.querySelectorAll('.nav-link').forEach(function(link) {
-        link.addEventListener('click', function() {
-            navToggle.classList.remove('active');
-            navMenu.classList.remove('active');
+    if (navToggle && navMenu) {
+        navToggle.addEventListener('click', function() {
+            navMenu.classList.toggle('open');
         });
-    });
 
-    /* ===== Navbar Scroll Effect ===== */
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                navMenu.classList.remove('open');
+            });
+        });
+    }
+
+    /* ===== Navbar Scroll + Back to Top ===== */
     var navbar = document.getElementById('navbar');
     var backToTop = document.getElementById('backToTop');
 
     window.addEventListener('scroll', function() {
-        var scrollY = window.scrollY;
-
-        if (scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-
-        if (scrollY > 500) {
-            backToTop.classList.add('visible');
-        } else {
-            backToTop.classList.remove('visible');
-        }
+        var y = window.scrollY;
+        if (navbar) navbar.classList.toggle('scrolled', y > 50);
+        if (backToTop) backToTop.classList.toggle('visible', y > 600);
     });
 
-    /* ===== Back to Top ===== */
-    backToTop.addEventListener('click', function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    /* ===== Active Nav Link on Scroll ===== */
-    var sections = document.querySelectorAll('section[id]');
-    var navLinks = document.querySelectorAll('.nav-link');
-
-    function updateActiveNav() {
-        var scrollY = window.scrollY + 100;
-
-        sections.forEach(function(section) {
-            var sectionTop = section.offsetTop;
-            var sectionHeight = section.offsetHeight;
-            var sectionId = section.getAttribute('id');
-
-            if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-                navLinks.forEach(function(link) {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + sectionId) {
-                        link.classList.add('active');
-                    }
-                });
-            }
+    if (backToTop) {
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
-    window.addEventListener('scroll', updateActiveNav);
+    /* ===== Cases & News Tabs ===== */
+    function bindTabs(tabSel, panelSel) {
+        document.querySelectorAll(tabSel).forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var key = this.dataset.tab;
+                document.querySelectorAll(tabSel).forEach(function(t) {
+                    t.classList.toggle('active', t === tab);
+                });
+                document.querySelectorAll(panelSel).forEach(function(p) {
+                    p.classList.toggle('active', p.id === key);
+                });
+            });
+        });
+    }
+    bindTabs('.case-tab', '.case-panel');
+    bindTabs('.news-tab', '.news-panel');
 
-    /* ===== Counter Animation ===== */
-    function animateCounter(element) {
-        var target = parseInt(element.getAttribute('data-target'), 10);
-        var suffix = element.getAttribute('data-suffix') || '';
-        var duration = 2000;
-        var startTime = null;
+    /* ===== Stat Counter Animation ===== */
+    var counters = document.querySelectorAll('.stat-number');
+    var counterAnimated = false;
 
-        function step(timestamp) {
-            if (!startTime) startTime = timestamp;
-            var progress = Math.min((timestamp - startTime) / duration, 1);
-            // Ease out cubic
-            var eased = 1 - Math.pow(1 - progress, 3);
-            var current = Math.floor(eased * target);
-            element.textContent = current + suffix;
-
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            } else {
-                element.textContent = target + suffix;
-            }
+    function animateCounter(el) {
+        var target = parseInt(el.dataset.target, 10);
+        var suffix = el.dataset.suffix || '';
+        var duration = 1600;
+        var start = performance.now();
+        function step(now) {
+            var t = Math.min((now - start) / duration, 1);
+            var ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+            var val = Math.floor(target * ease);
+            el.textContent = val + suffix;
+            if (t < 1) requestAnimationFrame(step);
+            else el.textContent = target + suffix;
         }
-
         requestAnimationFrame(step);
     }
 
-    /* ===== Intersection Observer for Reveal & Counter ===== */
-    var revealElements = document.querySelectorAll(
-        '.section-header, .about-intro, .about-culture, .about-qualifications, ' +
-        '.service-block, .service-sub-card, .advantage-item, .culture-card, ' +
-        '.highlight-item, .case-card, .partner-logo, .contact-item, .contact-form-wrapper, ' +
-        '.intl-item, .intl-section, .qual-badge, .news-empty'
-    );
-
-    revealElements.forEach(function(el, index) {
-        el.classList.add('reveal');
-        if (index % 4 === 1) el.classList.add('reveal-delay-1');
-        if (index % 4 === 2) el.classList.add('reveal-delay-2');
-        if (index % 4 === 3) el.classList.add('reveal-delay-3');
-    });
-
-    var observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    var revealObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-
-                // Trigger counter animation for stat numbers
-                var counters = entry.target.querySelectorAll('.stat-number');
-                counters.forEach(function(counter) {
-                    if (!counter.classList.contains('animated')) {
-                        counter.classList.add('animated');
-                        animateCounter(counter);
-                    }
-                });
-
-                // Also check if the element itself is a stat number
-                if (entry.target.classList.contains('stat-number') && !entry.target.classList.contains('animated')) {
-                    entry.target.classList.add('animated');
-                    animateCounter(entry.target);
+    if (counters.length && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting && !counterAnimated) {
+                    counterAnimated = true;
+                    counters.forEach(animateCounter);
+                    io.disconnect();
                 }
+            });
+        }, { threshold: 0.3 });
+        if (counters[0]) io.observe(counters[0].closest('.hero-stats'));
+    }
 
-                revealObserver.unobserve(entry.target);
-            }
+    /* ===== Reveal on Scroll ===== */
+    if ('IntersectionObserver' in window) {
+        var revealTargets = document.querySelectorAll(
+            '.service-block, .case-field, .result-block, .team-card, ' +
+            '.country-item, .qual-fact, .qual-figure, .culture-card, ' +
+            '.stat-item, .partner-logo, .contact-item'
+        );
+        revealTargets.forEach(function(el) {
+            el.classList.add('reveal');
         });
-    }, observerOptions);
+        var ro = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    ro.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+        revealTargets.forEach(function(el) { ro.observe(el); });
+    }
 
-    // Observe all reveal elements and stat numbers
-    document.querySelectorAll('.reveal').forEach(function(el) {
-        revealObserver.observe(el);
-    });
-
-    // Also observe stat numbers directly (in hero section)
-    document.querySelectorAll('.stat-number').forEach(function(el) {
-        revealObserver.observe(el);
-    });
-
-    // Trigger hero counters immediately
-    setTimeout(function() {
-        document.querySelectorAll('.hero .stat-number').forEach(function(counter) {
-            if (!counter.classList.contains('animated')) {
-                counter.classList.add('animated');
-                animateCounter(counter);
-            }
-        });
-    }, 500);
-
-    /* ===== Case Tabs ===== */
-    var caseTabs = document.querySelectorAll('.case-tab');
-    var casePanels = document.querySelectorAll('.case-panel');
-
-    caseTabs.forEach(function(tab) {
-        tab.addEventListener('click', function() {
-            var targetTab = this.getAttribute('data-tab');
-
-            caseTabs.forEach(function(t) { t.classList.remove('active'); });
-            casePanels.forEach(function(p) { p.classList.remove('active'); });
-
-            this.classList.add('active');
-            var targetPanel = document.getElementById(targetTab);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-        });
-    });
-
-    /* ===== News Tabs ===== */
-    var newsTabs = document.querySelectorAll('.news-tab');
-    var newsPanels = document.querySelectorAll('.news-panel');
-
-    newsTabs.forEach(function(tab) {
-        tab.addEventListener('click', function() {
-            var targetTab = this.getAttribute('data-tab');
-
-            newsTabs.forEach(function(t) { t.classList.remove('active'); });
-            newsPanels.forEach(function(p) { p.classList.remove('active'); });
-
-            this.classList.add('active');
-            var targetPanel = document.getElementById(targetTab);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-        });
-    });
-
-    /* ===== Contact Form ===== */
+    /* ===== Contact Form Validation ===== */
     var contactForm = document.getElementById('contactForm');
     var formNotice = document.getElementById('formNotice');
 
-    if (contactForm) {
+    if (contactForm && formNotice) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
-
-            var name = document.getElementById('name').value.trim();
-            var phone = document.getElementById('phone').value.trim();
+            var name = contactForm.name.value.trim();
+            var phone = contactForm.phone.value.trim();
 
             if (!name || !phone) {
                 formNotice.className = 'form-notice error';
                 formNotice.textContent = '请填写姓名和联系电话';
                 return;
             }
-
-            // Phone validation (Chinese mobile)
-            var phonePattern = /^1[3-9]\d{9}$/;
-            if (!phonePattern.test(phone)) {
+            if (!/^[\d\-\+\s\(\)]{7,20}$/.test(phone)) {
                 formNotice.className = 'form-notice error';
-                formNotice.textContent = '请输入正确的手机号码';
+                formNotice.textContent = '请填写有效的联系电话';
                 return;
             }
 
-            // Simulate form submission
             formNotice.className = 'form-notice';
-            formNotice.textContent = '正在提交...';
+            formNotice.textContent = '正在提交…';
 
             setTimeout(function() {
                 formNotice.className = 'form-notice success';
                 formNotice.textContent = '提交成功！我们将在24小时内联系您。';
                 contactForm.reset();
-
                 setTimeout(function() {
                     formNotice.textContent = '';
                     formNotice.className = 'form-notice';
@@ -257,37 +160,32 @@
         });
     }
 
-    /* ===== Smooth Scroll for Anchor Links ===== */
-    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-        anchor.addEventListener('click', function(e) {
+    /* ===== Smooth Scroll ===== */
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+        a.addEventListener('click', function(e) {
             var href = this.getAttribute('href');
             if (href === '#') return;
-
             var target = document.querySelector(href);
             if (target) {
                 e.preventDefault();
-                var offset = 72; // navbar height
-                var targetPosition = target.offsetTop - offset;
-                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                var offset = 76;
+                window.scrollTo({ top: target.offsetTop - offset, behavior: 'smooth' });
             }
         });
     });
 
-    /* ===== Magnetic Effect for Buttons ===== */
-    document.querySelectorAll('.btn-primary, .nav-cta').forEach(function(btn) {
+    /* ===== Magnetic Effect (subtle) ===== */
+    document.querySelectorAll('.btn-primary').forEach(function(btn) {
         btn.addEventListener('mousemove', function(e) {
-            var rect = this.getBoundingClientRect();
-            var x = e.clientX - rect.left - rect.width / 2;
-            var y = e.clientY - rect.top - rect.height / 2;
-            this.style.transform = 'translate(' + (x * 0.15) + 'px, ' + (y * 0.15) + 'px)';
+            var r = this.getBoundingClientRect();
+            var x = (e.clientX - r.left - r.width / 2) * 0.12;
+            var y = (e.clientY - r.top - r.height / 2) * 0.12;
+            this.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         });
-
-        btn.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
+        btn.addEventListener('mouseleave', function() { this.style.transform = ''; });
     });
 
-    console.log('%c茂达智联 V2.0', 'font-size: 24px; font-weight: bold; color: #C9A84C;');
+    console.log('%c茂达智联 V3.0', 'font-size: 24px; font-weight: bold; color: #C9A84C;');
     console.log('%c知识产权全生命周期管理专家', 'font-size: 14px; color: #1A3A5C;');
     console.log('%c© 2016-2026 深圳茂达智联知识产权代理事务所（普通合伙）', 'font-size: 12px; color: #888;');
 
