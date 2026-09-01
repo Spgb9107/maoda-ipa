@@ -1966,6 +1966,25 @@ ul, ol {
     font-size: 12px;
 }
 
+.footer-icp {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.footer-icp a {
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.55);
+    padding-bottom: 1px;
+    transition: color .25s ease, border-color .25s ease;
+}
+
+.footer-icp a:hover {
+    color: var(--brand-gold);
+    border-color: var(--brand-gold);
+}
+
 /* ---------- Back to top ---------- */
 .back-to-top {
     position: fixed;
